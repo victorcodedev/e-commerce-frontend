@@ -1,0 +1,177 @@
+<nav class="font-[Sora] bg-white border-b border-black/10 px-6 max-[600px]:px-4 sticky top-0 z-[1000]">
+
+  <!-- ===== LINHA PRINCIPAL ===== -->
+  <div class="flex items-center gap-4 h-16">
+
+    <!-- Logo -->
+    <a routerLink="/" class="text-[18px] font-semibold text-[#111] tracking-[-0.5px] whitespace-nowrap shrink-0 no-underline cursor-pointer">
+      shop<span class="text-[#D85A30]">.</span>
+      <span class="inline max-[480px]:hidden">store</span>
+      <span class="hidden max-[480px]:inline">s</span>
+    </a>
+
+    <!-- Busca -->
+    <div class="flex-1 max-w-[480px] relative mx-auto">
+      <input
+        type="text"
+        placeholder="Buscar produtos..."
+        [(ngModel)]="searchQuery"
+        (keydown)="onSearchKeydown($event)"
+        class="w-full h-[38px] border border-black/20 rounded-full pl-4 pr-10 text-sm bg-[#f7f7f5] text-[#111] outline-none focus:border-[#D85A30] focus:bg-white placeholder:text-[#aaa]"
+      />
+      <button
+        (click)="onSearch()"
+        aria-label="Buscar"
+        class="absolute right-2 top-1/2 -translate-y-1/2 text-[#888] hover:text-[#D85A30]"
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Ações -->
+    <div class="flex items-center gap-1 shrink-0">
+
+      <!-- Favoritos -->
+      <button
+        (click)="toggleWishlist()"
+        [class.text-[#D85A30]]="wishlistActive()"
+        class="relative w-10 h-10 flex items-center justify-center rounded-md text-[#666] hover:bg-[#f3f3f1] hover:text-[#111]"
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+        </svg>
+
+        @if (wishlistActive() && wishlistCount() > 0) {
+          <span class="absolute top-[5px] right-[5px] min-w-[16px] h-[16px] rounded-full bg-[#D85A30] text-white text-[10px] font-semibold flex items-center justify-center px-[3px]">
+            {{ wishlistCount() }}
+          </span>
+        }
+      </button>
+
+      <!-- Carrinho -->
+      <div class="relative" #cartRef>
+        <button
+          (click)="toggleCart()"
+          class="relative w-10 h-10 flex items-center justify-center rounded-md text-[#666] hover:bg-[#f3f3f1] hover:text-[#111]"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <circle cx="9" cy="21" r="1"/>
+            <circle cx="20" cy="21" r="1"/>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+          </svg>
+
+          @if (cartCount() > 0) {
+            <span class="absolute top-[5px] right-[5px] min-w-[16px] h-[16px] rounded-full bg-[#D85A30] text-white text-[10px] font-semibold flex items-center justify-center px-[3px]">
+              {{ cartCount() }}
+            </span>
+          }
+        </button>
+
+        @if (cartOpen()) {
+          <div class="absolute top-[calc(100%+8px)] right-0 w-[280px] bg-white border border-black/10 rounded-xl p-3 shadow-md z-[200]">
+
+            <p class="text-[13px] font-medium text-[#111] mb-2">Carrinho</p>
+
+            @if (cartItems().length === 0) {
+              <p class="text-[13px] text-[#aaa] text-center py-3">
+                Seu carrinho está vazio.
+              </p>
+            } @else {
+
+              @for (item of cartItems(); track item.id) {
+                <div class="flex items-center gap-2 py-2 border-t border-black/10">
+                  <div class="w-9 h-9 rounded-md bg-[#f7f7f5] border border-black/10 flex items-center justify-center text-lg">
+                    {{ item.emoji }}
+                  </div>
+
+                  <div class="flex-1 min-w-0">
+                    <div class="text-[12px] font-medium text-[#111] truncate">
+                      {{ item.name }}
+                    </div>
+                    <div class="text-[12px] text-[#888]">
+                      {{ formatPrice(item.price) }}
+                    </div>
+                  </div>
+                </div>
+              }
+
+              <div class="mt-2 pt-2 border-t border-black/10 flex items-center justify-between">
+                <span class="text-[13px] font-medium text-[#111]">
+                  {{ formatPrice(cartTotal()) }}
+                </span>
+
+                <button
+                  (click)="goToCheckout()"
+                  class="px-3 py-[6px] bg-[#D85A30] hover:bg-[#C04E26] text-white text-[12px] font-semibold rounded-full"
+                >
+                  Finalizar
+                </button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Divider -->
+      <div class="w-[1px] h-[22px] bg-black/10 mx-1"></div>
+
+      <!-- Usuário -->
+      <div class="relative" #userRef>
+        <button
+          (click)="toggleUser()"
+          class="flex items-center gap-2 h-[38px] px-4 max-[600px]:px-2 rounded-full border border-black/20 text-[13px] font-medium text-[#111] hover:bg-[#f3f3f1]"
+        >
+          <div class="w-6 h-6 rounded-full bg-[#FAECE7] flex items-center justify-center text-[11px] font-semibold text-[#D85A30]">
+            {{ isLoggedIn() ? currentUser()!.initials : '?' }}
+          </div>
+
+          <span class="max-[600px]:hidden">
+            {{ isLoggedIn() ? currentUser()!.name.split(' ')[0] : 'Entrar' }}
+          </span>
+
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </button>
+
+        @if (userOpen()) {
+          <div class="absolute top-[calc(100%+8px)] right-0 min-w-[200px] bg-white border border-black/10 rounded-xl p-1 shadow-md z-[200]">
+
+            @if (!isLoggedIn()) {
+
+              <div class="px-3 py-2 text-[13px] text-[#D85A30] font-medium hover:bg-[#f3f3f1] cursor-pointer flex gap-2">
+                Fazer login
+              </div>
+
+              <div class="px-3 py-2 text-[13px] text-[#666] hover:bg-[#f3f3f1] cursor-pointer flex gap-2">
+                Criar conta
+              </div>
+
+            } @else {
+
+              <div class="px-3 py-2 text-[13px] text-[#666] hover:bg-[#f3f3f1] cursor-pointer flex gap-2" (click)="goToProfile()">
+                Meu perfil
+              </div>
+
+              <div class="px-3 py-2 text-[13px] text-[#666] hover:bg-[#f3f3f1] cursor-pointer flex gap-2" (click)="goToOrders()">
+                Meus pedidos
+              </div>
+
+              <div class="h-[1px] bg-black/10 my-1"></div>
+
+              <div class="px-3 py-2 text-[13px] text-red-500 hover:bg-red-50 cursor-pointer flex gap-2">
+                Sair
+              </div>
+            }
+
+          </div>
+        }
+      </div>
+
+    </div>
+  </div>
+
+</nav>
